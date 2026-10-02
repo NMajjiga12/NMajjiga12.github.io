@@ -1,6 +1,5 @@
-# MKWii Code Generator
-
-A static web page for building Mario Kart Wii Gecko codes:
+# MKWii Button Remapper Generator
+A static web page for building Mario Kart Wii Gecko codes and remapping buttons based on controllers:
 
 - **Button remap**: choose a version and controller, then choose what each Classic Controller button does. It generates the `__parse_cl_data` remapper. Buttons you leave unchanged stay mapped one-for-one.
 - **Activators**: wrap your own code lines in button, shake, tilt or GameCube stick activators and build a code list. It imports and exports `mappings.json`.
