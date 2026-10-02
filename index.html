@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MKWii Code Generator</title>
+  <meta name="description" content="Build Mario Kart Wii Gecko button remaps and activator codes and save them as a plain .txt code list.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='8' width='28' height='16' rx='8' fill='%231B8FD0'/%3E%3Ccircle cx='22' cy='16' r='3' fill='white'/%3E%3Cpath d='M8 14h2v-2h2v2h2v2h-2v2h-2v-2H8z' fill='white'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Rubik:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>MKWii Code Generator</h1>
+      <p class="tagline">Remap Classic Controller buttons and build Gecko activator codes for Mario Kart Wii, saved as a plain .txt code list.</p>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <nav class="tabs" role="tablist" aria-label="Tools">
+      <button class="tab" role="tab" id="tab-remap" data-tab="remap" aria-controls="panel-remap" aria-selected="true">Button remap</button>
+      <button class="tab" role="tab" id="tab-activators" data-tab="activators" aria-controls="panel-activators" aria-selected="false" tabindex="-1">Activators</button>
+      <button class="tab" role="tab" id="tab-reference" data-tab="reference" aria-controls="panel-reference" aria-selected="false" tabindex="-1">Reference sheet</button>
+      <button class="tab" role="tab" id="tab-check" data-tab="check" aria-controls="panel-check" aria-selected="false" tabindex="-1">Table check</button>
+    </nav>
+  </div>
+
+  <main class="wrap">
+    <!-- ============================================================ Button remap -->
+    <section class="panel" id="panel-remap" role="tabpanel" aria-labelledby="tab-remap" tabindex="0">
+      <div class="layout">
+        <div class="config">
+          <div class="card">
+            <h2>1. Pick your version and controller</h2>
+            <div class="field-row">
+              <label class="field"><span>Version</span><select id="remap-region"></select></label>
+              <label class="field"><span>Controller</span><select id="remap-controller"></select></label>
+            </div>
+            <p class="note warn" id="remap-controller-note" hidden>The remapper only hooks the Classic Controller parser. Use the Activators tab for the Wii Wheel, Nunchuk or GameCube controller.</p>
+            <div class="hook-fields" id="remap-hook-fields" hidden>
+              <p class="note">The remapper hook addresses are only known for NTSC-U. Enter the addresses for this version to generate the code.</p>
+              <div class="field-row">
+                <label class="field"><span>C2 hook address</span><input type="text" id="hook-addr" placeholder="801C87E4" maxlength="10" spellcheck="false" autocomplete="off"></label>
+                <label class="field"><span>Analog L write address</span><input type="text" id="hook-analog-1" placeholder="801C87C0" maxlength="10" spellcheck="false" autocomplete="off"></label>
+                <label class="field"><span>Analog R write address</span><input type="text" id="hook-analog-2" placeholder="801C87CC" maxlength="10" spellcheck="false" autocomplete="off"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" id="remap-buttons-card">
+            <div class="card-head">
+              <h2>2. Choose what each button does</h2>
+              <span class="pill" id="remap-count" aria-live="polite"></span>
+            </div>
+            <p class="hint">Buttons left on “Unchanged” stay mapped one-for-one.</p>
+            <div class="toolbar">
+              <button type="button" class="btn btn-quiet" id="remap-example">Load example layout</button>
+              <button type="button" class="btn btn-quiet" id="remap-reset">Reset all buttons</button>
+            </div>
+            <div class="remap-rows" id="remap-rows"></div>
+          </div>
+
+          <div class="card">
+            <h2>3. Options</h2>
+            <label class="check">
+              <input type="checkbox" id="remap-analog">
+              <span>Disable analog L/R shoulder data<small>Recommended when you change L, R, ZL or ZR, especially on a Classic Controller Pro with digital shoulders. Turns on automatically when you do.</small></span>
+            </label>
+          </div>
+        </div>
+
+        <aside class="card output" aria-labelledby="remap-out-title">
+          <div class="card-head">
+            <h2 id="remap-out-title">Code list</h2>
+            <span class="pill" id="remap-lines"></span>
+          </div>
+          <pre class="code" id="remap-output" tabindex="0" aria-label="Generated remap code"></pre>
+          <div class="out-actions">
+            <label class="field filename"><span>File name</span><input type="text" id="remap-filename" value="classic_remap.txt" spellcheck="false"></label>
+            <button type="button" class="btn" id="remap-copy">Copy</button>
+            <button type="button" class="btn btn-primary" id="remap-download">Download .txt</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================================================ Activators -->
+    <section class="panel" id="panel-activators" role="tabpanel" aria-labelledby="tab-activators" tabindex="0" hidden>
+      <div class="layout">
+        <div class="config">
+          <div class="card">
+            <h2>Version</h2>
+            <div class="field-row">
+              <label class="field"><span>Every code in the list targets</span><select id="act-region"></select></label>
+            </div>
+            <div class="toolbar">
+              <label class="btn btn-quiet file-btn">Import mappings.json<input type="file" id="act-import" accept=".json,application/json" class="offscreen"></label>
+              <button type="button" class="btn btn-quiet" id="act-export">Export mappings.json</button>
+              <button type="button" class="btn btn-quiet" id="act-clear">Clear list</button>
+            </div>
+            <p class="status" id="act-status" role="status"></p>
+          </div>
+
+          <div class="card">
+            <h2 id="act-form-title">New code</h2>
+            <label class="field"><span>Title</span><input type="text" id="act-title"></label>
+            <h3>Activator conditions <small>All of them must be true for the code to run.</small></h3>
+            <div class="conds" id="act-conditions"></div>
+            <button type="button" class="btn btn-quiet" id="act-add-cond">Add another condition</button>
+            <label class="field code-field"><span>Code lines to run while active</span>
+              <textarea id="act-code" rows="6" spellcheck="false" placeholder="04XXXXXX YYYYYYYY"></textarea></label>
+            <h3>Preview</h3>
+            <pre class="code code-sm" id="act-preview" aria-live="polite"></pre>
+            <ul class="messages" id="act-warnings"></ul>
+            <div class="toolbar">
+              <button type="button" class="btn btn-primary" id="act-save">Add to list</button>
+              <button type="button" class="btn btn-quiet" id="act-cancel" hidden>Cancel edit</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="card output" aria-labelledby="act-out-title">
+          <div class="card-head">
+            <h2 id="act-out-title">Code list</h2>
+            <span class="pill" id="act-count"></span>
+          </div>
+          <ul class="entry-list" id="act-list"></ul>
+          <p class="hint" id="act-empty">No codes yet. Set up a code on the left and choose “Add to list”.</p>
+          <pre class="code" id="act-output" tabindex="0" aria-label="Generated code list"></pre>
+          <div class="out-actions">
+            <label class="field filename"><span>File name</span><input type="text" id="act-filename" value="codes.txt" spellcheck="false"></label>
+            <button type="button" class="btn" id="act-copy">Copy</button>
+            <button type="button" class="btn btn-primary" id="act-download">Download .txt</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================================================ Reference sheet -->
+    <section class="panel" id="panel-reference" role="tabpanel" aria-labelledby="tab-reference" tabindex="0" hidden>
+      <div class="layout">
+        <div class="config">
+          <div class="card">
+            <h2>Every activator for one version</h2>
+            <p class="hint">One activator per button, controller slot, shake, tilt and GCN stick direction. Paste your code under the activator you want and end it with <code>E0000000 80008000</code>.</p>
+            <div class="field-row">
+              <label class="field"><span>Version</span><select id="ref-region"></select></label>
+              <label class="field"><span>Match</span>
+                <select id="ref-mode">
+                  <option value="atleast">At least the button (others may be held)</option>
+                  <option value="exact">Exactly the button, nothing else</option>
+                </select></label>
+            </div>
+          </div>
+        </div>
+        <aside class="card output" aria-labelledby="ref-out-title">
+          <div class="card-head">
+            <h2 id="ref-out-title">Reference sheet</h2>
+            <span class="pill on" id="ref-count"></span>
+          </div>
+          <pre class="code" id="ref-output" tabindex="0" aria-label="Reference sheet"></pre>
+          <div class="out-actions">
+            <label class="field filename"><span>File name</span><input type="text" id="ref-filename" spellcheck="false"></label>
+            <button type="button" class="btn" id="ref-copy">Copy</button>
+            <button type="button" class="btn btn-primary" id="ref-download">Download .txt</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================================================ Table check -->
+    <section class="panel" id="panel-check" role="tabpanel" aria-labelledby="tab-check" tabindex="0" hidden>
+      <div class="card narrow">
+        <h2>Forum address table check</h2>
+        <p class="hint">Each Wii Remote slot is a 0x538-byte block, and the button, shake and tilt values sit at the same offsets inside it in every version. Values that break that pattern are probably typos in the forum thread.</p>
+        <p id="check-summary"></p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th scope="col">Version</th><th scope="col">Value</th><th scope="col">Forum lists</th><th scope="col">Pattern predicts</th></tr></thead>
+            <tbody id="check-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Addresses from the mkwii.com “Controller Address &amp; Button Values” thread. To make a GCT, paste the .txt into an online GCT maker or Ocarina.</p>
+    </div>
+  </footer>
+
+  <!-- Plain scripts (not modules) so the page also works when opened straight from disk -->
+  <script src="js/data.js"></script>
+  <script src="js/codegen.js"></script>
+  <script src="js/dom.js"></script>
+  <script src="js/remap.js"></script>
+  <script src="js/activators.js"></script>
+  <script src="js/reference.js"></script>
+  <script src="js/check.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
